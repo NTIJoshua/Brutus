@@ -1,8 +1,10 @@
 level = 1
 experience = 0
-
+#lalala
 p "What's your name, kid?"
-playername = gets.chomp
+answer = gets.chomp
+playername = answer
+
 while playername.length > 20
   p "What??"
   playername = gets.chomp
