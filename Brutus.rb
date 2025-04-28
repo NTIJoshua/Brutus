@@ -19,7 +19,7 @@ class AdventureGame
 
   def start
     character_creation
-    introduction_dialogue  # This now happens first
+    introduction_dialogue  
     puts "\nType 'help' for a list of commands.\n"
     game_loop
   end
@@ -28,9 +28,12 @@ class AdventureGame
 
   def character_creation
     puts "What's your name, kid?"
-    puts "*He helps you up*"
+    puts "*He stretches out his war-worn hand.*"
     @playername = gets.chomp
-    
+    puts "*You grab his hand and pull yourself up*"
+    sleep 4
+    puts "My name is #{@playername}."
+    sleep 4
     while @playername.length > 10
       puts "What?? That's too long!"
       @playername = gets.chomp
@@ -57,11 +60,11 @@ class AdventureGame
   end
 
   def introduction_dialogue
-    sleep 1
+    sleep 4
     puts "\nWho am I? The name's Robbert, a mercenary, nice to meet'cha."
-    sleep 1
+    sleep 4
     puts "Robbert: By the way, how'd you get in this mess? How old are you even?"
-    sleep 1
+    sleep 4
     
     # Player's response options
     puts "How do you respond?"
@@ -76,25 +79,26 @@ class AdventureGame
       puts "#{@playername}: I'm twelve. Both of my parents died from a massive boulder that fell from the sky when the invasion began."
       @game_state[:robert_trust] += 2
       @game_state[:boulder_event] = true
-      sleep 1
+      sleep 4
     when 2
       puts "#{@playername}: I'm... sixteen. I got separated from my unit."
       @game_state[:robert_trust] -= 1
-      sleep 1
+      sleep 4
     else
       puts "#{@playername}: ..."
       puts "Robbert: Tough kid, huh? Fair enough."
-      sleep 1
+      sleep 4
     end
     
-    sleep 1
+    sleep 4
     puts "Robbert: ...My condolences. Then again, you're probably not the only one."
-    sleep 2
+    sleep 4
     puts "Robbert: Wouldn't surprise me if the churches were working their asses off right now."
-    sleep 2
+    sleep 4
     puts "\nThe battlefield stretches before you - smoke rises from distant craters, and the sounds of distant combat echo."
     @game_state[:knows_about_invasion] = true
-    sleep 2
+    sleep 4
+    describe_room
   end
 
   def describe_room
@@ -106,7 +110,7 @@ class AdventureGame
       puts "And another."
       puts "And another."
       puts "You hold your head high." 
-      puts "\nOptions: [search] the area, [move] toward the sounds of fighting, [examine] the strange boulders."
+     
       
       if @game_state[:boulder_event] && !@game_state[:found_parents]
         puts "There's a massive, unnatural-looking boulder to the northeast with something glinting nearby."
@@ -115,7 +119,7 @@ class AdventureGame
       puts "\nThe Skyfall Impact Site"
       puts "The massive meteor-like boulder dominates the landscape. Its surface is unnaturally smooth."
       puts "Near its base, you spot two figures in noble garb - unmoving."
-      puts "Options: [approach] the bodies, [examine] the boulder, [return] to main battlefield"
+      
     end
   end
 
@@ -148,7 +152,6 @@ class AdventureGame
 
   def game_loop
     until @game_over
-      describe_room
       print "> "
       input = gets.chomp.downcase.strip
       
