@@ -17,12 +17,15 @@ class AdventureGame
       robert_trust: 0,
       knows_about_invasion: false,
       found_parents: false,
-      boulder_event: false
+      boulder_event: false,
+      hearing_fighting_battlefield: false,
+      next_to_robbert: true,
+      at_battlefield: true
     }
     @level = 1
     @experience = 0
     @playername = ""
-    @strength = rand(5..10)
+    @health = rand(5..10)
     @time = "afternoon"
     @day = 1
     @enemies = {
@@ -37,7 +40,7 @@ class AdventureGame
   end
 
 def player_name
-  colorize(@playername, :yellow)
+  colorize(@playername.capitalize, :yellow)
 end
 
   def start
@@ -51,13 +54,13 @@ end
 
   def character_creation
     puts "What's your name, kid?"
-    puts "*He stretches out his war-worn hand.*"
+    puts "*He stretches out his war-torn hand.*"
     @playername = gets.chomp
     puts "#{colorize(*'You grab his hand and pull yourself up*', :green)}"
     sleep 4
     puts "My name is #{player_name}."
     sleep 4
-    while @playername.length > 10
+    if @playername.length > 10
       puts "What?? That's too long!"
       @playername = gets.chomp
     end
@@ -66,9 +69,14 @@ end
       puts "Stop lying. No parent would name their child that."
       @playername = gets.chomp
     end
-    case @playername[0]&.upcase
+
+    firstletter = @playername[0]&.upcase
+    case firstletter
     when "S"
       puts "#{player_name}, huh? Strong name. Don't worry, I've been on more battlefields than you can count. I'll get you out of here."
+    when "G"
+      puts "#{player_name}, huh..?"
+      puts "#{colorize('*He looks at you strangely*', :green)}."
     when "J"
       puts "#{player_name}, huh? An honorable name. I can tell you'll be great. Don't worry, I've been on more battlefields than you can count. I'll get you out of here."
     when "H"
@@ -84,6 +92,12 @@ end
 
   def introduction_dialogue
     sleep 4
+    if @playername[0]&.upcase == "G"
+      puts "#{player_name}: ...Who are you?"
+    else
+      puts "#{player_name}: Who are you?"
+    end
+  
     puts "\nWho am I? The name's #{colorize('Robbert', :blue)}, a mercenary, nice to meet'cha."
     sleep 4
     puts "#{colorize('Robbert', :blue)}: By the way, how'd you get in this mess? How old are you even?"
@@ -99,7 +113,7 @@ end
 
     case answer
     when 1
-      puts "#{player_name}: I'm twelve. Both of my parents died from a massive boulder that fell from the sky when the invasion began."
+      puts "#{player_name}: I'm twelve. Both of my parents went missing some days ago when the invasion began."
       @game_state[:robert_trust] += 2
       @game_state[:boulder_event] = true
       sleep 4
@@ -107,18 +121,17 @@ end
       puts "#{player_name}: I'm... sixteen. I got separated from my unit."
       @game_state[:robert_trust] -= 1
       sleep 4
+      puts "#{colorize('Robbert', :blue)}: ...My condolences. Then again, you're probably not the only one."
+      sleep 4
+      puts "#{colorize('Robbert', :blue)}: Wouldn't surprise me if the churches were working their asses off right now."
+      sleep 4
     else
       puts "#{player_name}: ..."
       puts "#{colorize('Robbert', :blue)}: Tough kid, huh? Fair enough."
       sleep 4
     end
+    puts "#{colorize('*You take a look around*', :green)}"
     
-    sleep 4
-    puts "#{colorize('Robbert', :blue)}: ...My condolences. Then again, you're probably not the only one."
-    sleep 4
-    puts "#{colorize('Robbert', :blue)}: Wouldn't surprise me if the churches were working their asses off right now."
-    sleep 4
-    puts "\nThe battlefield stretches before you - smoke rises from distant craters, and the sounds of distant combat echo."
     @game_state[:knows_about_invasion] = true
     sleep 4
     describe_room
@@ -129,19 +142,19 @@ end
     when :battlefield
       puts "\nDay #{@day}, #{@time.capitalize}:  \nA horrendous sight."
       puts "You start to wonder if it was all really worth it in the end."
+      sleep 1
       puts "A mercenary is staring at you from the ground."
+      sleep 1
       puts "And another."
+      sleep 1
       puts "And another."
+      sleep 1
       puts "You hold your head high." 
      
-      
-      if @game_state[:boulder_event] && !@game_state[:found_parents]
-        puts "There's a massive, unnatural-looking boulder to the northeast with something glinting nearby."
-      end
     when :boulder_site
-      puts "\nThe Skyfall Impact Site"
-      puts "The massive meteor-like boulder dominates the landscape. Its surface is unnaturally smooth."
-      puts "Near its base, you spot two figures in noble garb - unmoving."  
+      puts "\n"
+      puts "The massive meteor-like boulder dominates the landscape. The boulder, charred and bloody, bears properties of both metal and stone."
+      puts "The colossal stone dwarfed the corpses half-buried under the boulder, causing you to miss them at first glance."  
     end
   end
 
@@ -153,11 +166,19 @@ end
       return true
       
     when [:battlefield, "examine"]
-      if @game_state[:boulder_event]
-        @current_room = :boulder_site
-        puts "You approach the massive boulder that fell from the sky..."
+        puts "There's a massive boulder to the northeast."
+        puts "\nYou see lives ending." 
+        puts "Violence in all directions."
+        @game_state[:hearing_fighting_battlefield] = true
         return true
       end
+    when [:battlefield, "listen"]
+      @game_state[:hearing_fighting_battlefield] = true
+      puts "Screams by children of war echo in your head."
+      sleep 1
+      puts "A certain sound takes priority over the others."
+      sleep 1
+      puts "Turning your head towards their fight, you observe as if in pain."
     when [:boulder_site, "approach"]
       unless @game_state[:found_parents]
         puts "As you get closer, your heart sinks - it's your parents."
@@ -211,6 +232,8 @@ end
         show_help
       when 'quit', 'exit'
         @game_over = true
+      when 'listen'
+        ''
       else
         puts "I don't understand that command."
       end
@@ -219,14 +242,18 @@ end
   end
 
   def move_to(direction)
-    case [@current_room, direction]
-    when [:battlefield, "toward"], [:battlefield, "fighting"]
+    case [@current_room, direction] 
+    when [:battlefield, "toward fighting"], [:battlefield, "fighting"], [:battlefield, "toward"]
+      if @game_state[:hearing_fighting_battlefield]
       puts "You move toward the sounds of clashing steel..."
       initiate_combat("stragglers")
+      else
+        "You seem to be a bit out of it."
+      end
     when [:battlefield, "northeast"], [:battlefield, "ne"]
       if @game_state[:boulder_event] && !@game_state[:found_parents]
         @current_room = :boulder_site
-        puts "You approach the massive boulder that fell from the sky..."
+        puts "You approach the massive boulder"
       else
         puts "You don't see anything interesting in that direction."
       end
@@ -241,24 +268,26 @@ end
   def handle_dialogue(topic)
     case topic.downcase
     when "invasion"
-      puts "#{colorize('Robbert', :blue)}: The Eastern Empire struck at dawn with those damned sky-boulders first."
-      puts "Never seen anything like it. Took out half the noble houses before the fighting even started."
+      puts "#{colorize('Robbert', :blue)}: The Eastern Empire started the invasion when some days ago."
+      puts "No clue what made them so brazen, but I have heard rumors about some weapon"
     when "parents"
       if @game_state[:found_parents]
-        puts "#{colorize('Robbert', :blue)}: Your parents... they were targeted specifically. This was no random attack."
+        puts "#{colorize('Robbert', :blue)}: Your parents... I'm sorry, but you still have to live on."
       else
-        puts "#{colorize('Robbert', :blue)}: We'll find them, kid. But first we need to survive."
+        puts "#{colorize('Robbert', :blue)}: You need to worry about yourself more. It's all for naught if you don't survive in the end."
       end
-    when "#{colorize('Robbert', :blue)}", "robert", "yourself"
+    when "#{colorize('Robbert', :blue)}", "Robbert", "yourself"
+      if @game_state[:next_to_robbert]
       puts "#{colorize('Robbert', :blue)}: Me? Just a hired sword caught in the wrong place at the wrong time."
-      puts "I've fought in three wars before this one, but nothing like... this."
-      @game_state[:robert_trust] += 1
-    when "boulder", "sky-boulder", "meteor"
-      if @game_state[:boulder_event]
-        puts "#{colorize('Robbert', :blue)}: Those things aren't natural. Empire's got some new weapon."
-        puts "They're too smooth, too precise. And they always hit important targets."
+      puts "#{colorize('Robbert', :blue)}: I've fought in three wars before this one, but nothing like... this."
       else
-        puts "#{colorize('Robbert', :blue)}: What boulder are you talking about?"
+        puts "He's not here..."
+      @game_state[:robert_trust] += 1
+    when "boulder", "weapon", "meteor"
+        puts "#{colorize('Robbert', :blue)}: Mmm. Word on the street is, Empire's got some new secret weapon."
+        puts "#{colorize('Robbert', :blue)}: If it's a weapon potent enough to start war anew, then it really sounds terrifying."
+        puts "#{colorize('Robbert', :blue)}: Gives me some creepy vibes."
+        @game_state[:boulder_event] = true
       end
     else
       puts "#{colorize('Robbert', :blue)}: Not now, kid. Stay focused."
@@ -280,7 +309,7 @@ end
     
     # Random encounter chance
     if rand(1..10) > 7
-      enemy_types = ["stragglers", "imperial_scout", "mercenary"]
+      enemy_types = ["Stragglers", "Imperial Scout", "Mercenary"]
       enemy = enemy_types.sample
       initiate_combat(enemy)
     end
@@ -293,7 +322,7 @@ end
     
     while enemy_hp > 0
       puts "\nEnemy HP: #{enemy_hp}"
-      puts "Your HP: #{@strength}"
+      puts "Your HP: #{@health}"
       puts "\nWhat will you do?"
       puts "1. Attack"
       puts "2. Run"
@@ -315,9 +344,9 @@ end
         
         enemy_damage = enemy_stats[:damage] + rand(0..2)
         puts "The #{enemy} attacks you for #{enemy_damage} damage!"
-        @strength -= enemy_damage
+        @health -= enemy_damage
         
-        if @strength <= 0
+        if @health <= 0
           puts "You have been defeated..."
           @game_over = true
           break
@@ -331,9 +360,9 @@ end
           puts "You couldn't escape!"
           enemy_damage = enemy_stats[:damage] + rand(0..2)
           puts "The #{enemy} attacks you for #{enemy_damage} damage!"
-          @strength -= enemy_damage
+          @health -= enemy_damage
           
-          if @strength <= 0
+          if @health <= 0
             puts "You have been defeated..."
             @game_over = true
             break
@@ -377,10 +406,10 @@ end
 
   def level_up
     @level += 1
-    @strength += 2
+    @health += 2
     @experience = 0
     puts "You leveled up! You are now level #{@level}!"
-    puts "Your strength increased to #{@strength}!"
+    puts "Your health increased to #{@health}!"
   end
 
   def show_inventory
@@ -401,9 +430,9 @@ end
         puts "The spear was finely crafted, are you capable of using it to its fullest potential?"
       when 'bandages'
         heal_amount = rand(3..5)
-        @strength += heal_amount
+        @health += heal_amount
         @player_inventory.delete('bandages')
-        puts "You use the bandages to heal #{heal_amount} health. Your strength is now #{@strength}."
+        puts "You use the bandages to heal #{heal_amount} health. Your health is now #{@health}."
       when 'pendant'
         if @game_state[:found_parents]
           puts "You look at the pendant, matching your parents' crest. A tear rolls down your cheek."
@@ -461,7 +490,7 @@ end
 
   def show_stats
     puts "#{player_name}, Level #{@level}"
-    puts "Strength: #{@strength}"
+    puts "health: #{@health}"
     puts "Experience: #{@experience}/#{@level * 10}"
     puts "Weapon: #{current_weapon[:name]} (#{current_weapon[:damage]} damage)"
     puts "Robert's Trust: #{@game_state[:robert_trust]}"
@@ -470,11 +499,11 @@ end
 
   def current_weapon
     if @player_inventory.include?("spear") && @equipped_weapon == "spear"
-      {name: "Spear", damage: 10}
+      {name: "spear", damage: 10}
     elsif @player_inventory.include?("sword") && (@equipped_weapon == "sword" || @equipped_weapon.nil?)
-      {name: "Sword", damage: 8}
+      {name: "sword", damage: 8}
     else
-      {name: "Fists", damage: 3}
+      {name: "fists", damage: 3}
     end
   end
 
@@ -485,7 +514,7 @@ end
     puts "search - Look for items"
     puts "examine - Examine something interesting"
     puts "approach - Get closer to something"
-    puts "talk/ask [topic] - Ask #{colorize('Robbert', :blue)} about something"
+    puts "talk/ask [topic] - Ask [name] about something"
     puts "take/get [item] - Pick up an item"
     puts "use [item] - Use an item from your inventory"
     puts "equip [weapon] - Equip a weapon"

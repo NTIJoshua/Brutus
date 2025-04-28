@@ -51,7 +51,7 @@ class GameDataLoader
         next if line.empty? || line.start_with?('#')
         
         if line.start_with?('[') && line.end_with?(']')
-          # This is an entity name like [player] or [robert]
+          # This is an entity name like [player] or [Robbert]
           current_entity = line[1..-2].downcase
           stats[current_entity] = {}
         elsif current_entity && line.include?(':')
@@ -119,7 +119,7 @@ class GameDataLoader
         next if line.empty? || line.start_with?('#')
         
         if line.start_with?('[') && line.end_with?(']')
-          # This is an NPC name like [robert]
+          # This is an NPC name like [Robbert]
           save_current_dialogue(dialogues, current_npc, current_topic, current_lines)
           current_npc = line[1..-2].downcase
           dialogues[current_npc] ||= {}
@@ -226,7 +226,7 @@ def create_example_files
     f.puts "experience_cap: 10"
     f.puts "base_strength: 8"
     
-    f.puts "[robert]"
+    f.puts "[Robbert]"
     f.puts "base_trust: 0"
     f.puts "max_trust: 10"
   end
@@ -255,7 +255,7 @@ def create_example_files
   # Dialogue example
   File.open('data/dialogue.txt', 'w') do |f|
     f.puts "# NPC Dialogues"
-    f.puts "[robert]"
+    f.puts "[Robbert]"
     f.puts "{invasion}"
     f.puts "The Eastern Empire struck at dawn with those damned sky-boulders first."
     f.puts "Never seen anything like it. Took out half the noble houses before the fighting even started."
@@ -264,7 +264,7 @@ def create_example_files
     f.puts "{parents}"
     f.puts "require: found_parents: true"
     f.puts "Your parents... they were targeted specifically. This was no random attack."
-    f.puts "effect: robert_trust: +1"
+    f.puts "effect: Robbert_trust: +1"
     
     f.puts "{parents_default}"
     f.puts "require: found_parents: false"
